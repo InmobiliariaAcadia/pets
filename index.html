@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Interactivo: Industria Dental en México</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <!-- Visualization & Content Choices:
+    - Panorama General: KPIs (PIB, Crecimiento Turismo) as styled cards (Goal: Inform, Method: HTML/Tailwind). Bar chart for CAGR comparisons (Goal: Compare, Method: Chart.js, Justification: Easy comparison of growth rates).
+    - Submercados: Donut chart for Implantología % en Turismo Dental (Goal: Proportion, Method: Chart.js, Justification: Clear part-to-whole). Bar chart for Prótesis y Dispositivos CAGR (Goal: Compare, Method: Chart.js). Textual descriptions for Herramientas y Productos (Goal: Inform, Method: HTML/Tailwind lists/paragraphs).
+    - Tendencias de Consumo: Bulleted lists for Hábitos y Diferencias Generacionales/NSE (Goal: Inform, Method: HTML/Tailwind, Justification: Clear presentation of qualitative points).
+    - El Profesional Dental: Pie chart for Género Dentistas (Goal: Proportion, Method: Chart.js). Bar chart for Salario (H/M) (Goal: Compare, Method: Chart.js). Text for Tendencias y Carrera (Goal: Inform). Added a button to generate a summary of "Nuevas Tendencias y Carrera Dental" using Gemini API (Goal: Summarize, Method: LLM via Fetch API, Justification: Provides quick textual overview of a detailed section).
+    - Laboratorios Dentales: Lists for Productos Estrella, Oportunidades, Impacto 3D (Goal: Inform/Organize, Method: HTML/Tailwind). Added a button to generate innovative product ideas using Gemini API (Goal: Generate Ideas, Method: LLM via Fetch API, Justification: Provides actionable, creative insights directly within the relevant section).
+    - Oportunidades de Exportación: List for Mercados Clave y Factores (Goal: Inform, Method: HTML/Tailwind).
+    - Conclusiones: Text summary.
+    - All charts are Chart.js (Canvas). Interactions include tooltips. No SVG/Mermaid used. Structure supports progressive disclosure of information.
+    -->
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 600px; /* Adjusted for better fit in various layouts */
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px; /* Base height */
+            max-height: 350px; /* Max height */
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 350px;
+                max-height: 400px;
+            }
+        }
+        .sticky-nav {
+            position: -webkit-sticky; /* Safari */
+            position: sticky;
+            top: 0;
+            z-index: 50;
+        }
+        /* Custom scrollbar for better aesthetics */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #0d9488; /* teal-600 */
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #0f766e; /* teal-700 */
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-amber-50 text-neutral-800">
+
+    <header class="bg-teal-700 text-white p-6 shadow-lg sticky-nav">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center">
+            <h1 class="text-3xl font-bold mb-4 md:mb-0">Industria Dental en México: Un Análisis Interactivo</h1>
+            <nav>
+                <ul class="flex flex-wrap justify-center space-x-2 md:space-x-4">
+                    <li><a href="#panorama" class="hover:text-amber-200 text-sm md:text-base">Panorama</a></li>
+                    <li><a href="#submercados" class="hover:text-amber-200 text-sm md:text-base">Submercados</a></li>
+                    <li><a href="#consumo" class="hover:text-amber-200 text-sm md:text-base">Consumo</a></li>
+                    <li><a href="#profesional" class="hover:text-amber-200 text-sm md:text-base">Profesional</a></li>
+                    <li><a href="#laboratorios" class="hover:text-amber-200 text-sm md:text-base">Laboratorios</a></li>
+                    <li><a href="#exportacion" class="hover:text-amber-200 text-sm md:text-base">Exportación</a></li>
+                    <li><a href="#conclusiones" class="hover:text-amber-200 text-sm md:text-base">Conclusiones</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container mx-auto p-4 md:p-8">
+        
+        <section id="panorama" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Panorama General del Mercado</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                Esta sección ofrece una visión general de la industria dental en México, destacando su tamaño económico,
+                las principales cifras de crecimiento y las proyecciones clave que configuran el futuro del sector.
+                Descubre la dinámica económica y el potencial de expansión que caracteriza a este vital mercado de la salud.
+            </p>
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-2">PIB Consultorios Dentales (Q4 2024)</h3>
+                    <p class="text-3xl font-bold text-neutral-800">$858,143 M MXN</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-2">Turismo Dental México (2023)</h3>
+                    <p class="text-3xl font-bold text-neutral-800">USD 491.9 M</p>
+                    <p class="text-sm text-neutral-600">Proyección 2030: USD 1,716.2 M</p>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg text-center">
+                    <h3 class="text-xl font-semibold text-teal-600 mb-2">Unidades Económicas (Nov 2024)</h3>
+                    <p class="text-3xl font-bold text-neutral-800">72,707</p>
+                    <p class="text-sm text-neutral-600">Consultorios dentales registrados</p>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">Proyecciones de Crecimiento Anual Compuesto (CAGR)</h3>
+                 <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                    Las tasas de crecimiento anual compuesto (CAGR) indican la tasa de crecimiento promedio anual de una inversión durante un período específico superior a un año. Estos gráficos ilustran las proyecciones de crecimiento para diversos segmentos clave de la industria dental.
+                </p>
+                <div class="chart-container">
+                    <canvas id="cagrChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="submercados" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Submercados Clave</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                La industria dental se compone de diversos submercados interconectados. Aquí exploramos los servicios por tipo de procedimiento,
+                el mercado de herramientas y equipos, y los productos dentales específicos como las coronas, analizando su relevancia y crecimiento.
+            </p>
+            <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">Implantología en Turismo Dental (Ingresos 2023)</h3>
+                    <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        La implantología es un motor crucial del turismo dental, representando una porción significativa de los ingresos. Este gráfico muestra su participación.
+                    </p>
+                    <div class="chart-container" style="height: 280px; max-height: 300px;">
+                        <canvas id="implantologiaChart"></canvas>
+                    </div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">Crecimiento (CAGR) de Prótesis y Dispositivos</h3>
+                     <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        El mercado de prótesis y dispositivos dentales en México muestra un crecimiento sostenido, impulsado por la demanda y la innovación tecnológica.
+                    </p>
+                    <div class="chart-container" style="height: 280px; max-height: 300px;">
+                        <canvas id="protesisDispositivosChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="mt-8 bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-semibold text-teal-700 mb-4">Detalles de Submercados</h3>
+                <div class="space-y-4">
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Servicios y Procedimientos</h4>
+                        <p class="text-neutral-700">La odontología cosmética crece globalmente (7.1% anual hasta 2025). En México, la implantología y la ortodoncia son clave. El mercado de prótesis dentales (coronas, puentes, etc.) alcanzó USD 1.57 mil millones en 2023.</p>
+                        <p class="text-neutral-700 mt-1"><span class="font-semibold">Precios de Coronas (USD):</span> Resina Compuesta: $400-$600, Porcelana: $800-$2000, Zirconio: $1000-$2500.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Herramientas y Equipos Dentales</h4>
+                        <p class="text-neutral-700">El mercado de dispositivos dentales en México proyecta un CAGR del 6.8% (2024-2029). El intercambio comercial de instrumentos fue de US$191M en 2023. Destacan sistemas CAD/CAM y radiología digital.</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Productos Dentales Específicos</h4>
+                        <p class="text-neutral-700">Las coronas dominan el mercado de prótesis. Materiales como zirconio y porcelana son preferidos por su estética y resistencia. La demanda de materiales de impresión y dentaduras también es significativa.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="consumo" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Tendencias de Usuarios y Hábitos de Consumo</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                Los hábitos de los consumidores dentales en México están cambiando. Esta sección analiza la evolución de la conciencia sobre la salud bucal,
+                la influencia de la estética y las diferencias notables entre generaciones y niveles socioeconómicos en el acceso y preferencias de tratamiento.
+            </p>
+            <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4">Cambios en Hábitos del Mexicano</h3>
+                    <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                        <li>Mayor conciencia sobre higiene oral, pero bajo uso de hilo dental.</li>
+                        <li>Creciente preferencia por la estética dental y la "sonrisa perfecta".</li>
+                        <li>Aumento en demanda de blanqueamientos y carillas.</li>
+                        <li>Recomendación de visitas semestrales al dentista, aunque no siempre se cumple, especialmente en preescolares.</li>
+                        <li>Importancia de reducir consumo de azúcares, tabaco y alcohol.</li>
+                    </ul>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4">Diferencias Generacionales y NSE</h3>
+                    <p class="text-neutral-700 mb-2"><span class="font-semibold">Generaciones:</span></p>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-neutral-700 mb-3">
+                        <li><span class="font-semibold">Baby Boomers:</span> Salud general, métodos físicos.</li>
+                        <li><span class="font-semibold">Gen X:</span> Calidad, lealtad a marcas.</li>
+                        <li><span class="font-semibold">Millennials:</span> Digitales, prácticos, leales, preocupados por costos, buscan innovación.</li>
+                        <li><span class="font-semibold">Centennials:</span> Conscientes del medio ambiente, precios bajos, confían en tecnología para comparar.</li>
+                    </ul>
+                     <p class="text-neutral-700 mb-2"><span class="font-semibold">Salud Bucal por Edad:</span></p>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-neutral-700 mb-3">
+                        <li><span class="font-semibold">Adolescentes:</span> Mayor riesgo de caries y periodontopatías.</li>
+                        <li><span class="font-semibold">Adultos Mayores (50-60+):</span> Alta prevalencia de pérdida dental (8 de cada 10 con solo 10 dientes), edentulismo afecta ~90%.</li>
+                    </ul>
+                    <p class="text-neutral-700"><span class="font-semibold">Nivel Socioeconómico (NSE):</span></p>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-neutral-700">
+                        <li>Hogares de bajos ingresos con menos acceso a selladores y más caries no tratadas.</li>
+                        <li>Adultos mayores de NSE alto/medio-alto incurren en mayor gasto de bolsillo para rehabilitación (prótesis, coronas) debido a cobertura pública insuficiente.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="profesional" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">El Profesional Dental: Práctica y Carrera</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                La práctica dental y la carrera de odontología en México están en constante evolución. Aquí se exploran las nuevas tendencias adoptadas por los dentistas,
+                el crecimiento de la profesión, su demografía actual (edad y género), y cómo se distribuyen sus ingresos según los servicios ofrecidos.
+            </p>
+            <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">Distribución por Género (Dentistas, Q3 2024)</h3>
+                    <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        La profesión dental en México muestra una notable participación femenina, como se observa en la distribución por género de la fuerza laboral.
+                    </p>
+                    <div class="chart-container" style="height: 280px; max-height: 300px;">
+                        <canvas id="generoDentistasChart"></canvas>
+                    </div>
+                </div>
+                 <div class="bg-white p-6 rounded-lg shadow-lg">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">Salario Promedio Mensual (Dentistas, Q3 2024)</h3>
+                    <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        Comparativa del salario promedio mensual entre hombres y mujeres en la profesión dental.
+                    </p>
+                    <div class="chart-container" style="height: 280px; max-height: 300px;">
+                        <canvas id="salarioDentistasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <h3 class="text-2xl font-semibold text-teal-700 mb-4">Nuevas Tendencias y Carrera Dental</h3>
+                <div id="dentistTrendsContent" class="space-y-4">
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Tendencias de los Dentistas:</h4>
+                        <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li>Adopción de digitalización: Impresión 3D, IA, escáneres intraorales, CAD/CAM.</li>
+                            <li>Otras tecnologías: Teleodontología, odontología regenerativa, nanotecnología, robótica.</li>
+                            <li>Consolidación de prácticas (DSO) y especialización en odontología estética.</li>
+                            <li>Importancia de educación continua y marketing digital.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Carrera de Dentista:</h4>
+                        <p class="text-neutral-700">Población ocupada en consultorios: 451,000 (Q3 2024). Edad promedio: 41.4 años. Crecimiento en número de universidades y matrícula. Aún existe brecha entre oferta y demanda de profesionales.</p>
+                        <p class="text-neutral-700 mt-1">Salario promedio mensual general: $8,620 MXN (Q3 2024). Informalidad laboral: 30.7% (Q2 2021).</p>
+                    </div>
+                    <div>
+                        <h4 class="text-xl font-semibold text-teal-600">Ingreso por Servicio:</h4>
+                        <p class="text-neutral-700">Ingresos varían, sector privado hasta $50,000 MXN/mes o más con especialización. Procedimientos de rehabilitación (prótesis, coronas) y estética generan mayor ingreso.</p>
+                    </div>
+                </div>
+                <div class="mt-8 pt-4 border-t border-neutral-200">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">✨ Resumen de Tendencias del Profesional Dental ✨</h3>
+                    <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        Haz clic para obtener un resumen conciso de las nuevas tendencias y la carrera dental.
+                    </p>
+                    <div class="flex justify-center mb-4">
+                        <button id="summarizeDentistTrendsBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                            Resumir Tendencias
+                        </button>
+                    </div>
+                    <div id="dentistTrendsSummaryOutput" class="bg-neutral-50 p-6 rounded-lg shadow-inner border border-neutral-200 min-h-[100px] text-neutral-700 leading-relaxed text-center flex items-center justify-center">
+                        <p id="dentistTrendsSummaryPlaceholder">El resumen aparecerá aquí...</p>
+                        <div id="dentistTrendsLoadingIndicator" class="hidden animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="laboratorios" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Análisis de Laboratorios Dentales (Enfoque en Coronas)</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                Los laboratorios dentales son cruciales, especialmente en la producción de coronas. Esta sección detalla los productos en los que deberían enfocarse,
+                las oportunidades de crecimiento, el impacto de la tecnología 3D y el rol vital del servicio al cliente para su éxito.
+            </p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Productos Estrella y Enfoque</h3>
+                        <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li><span class="font-semibold">Coronas Dentales:</span> Principal segmento.
+                                <ul class="list-circle list-inside ml-4 text-sm">
+                                    <li>Zirconio: Resistencia y estética superior.</li>
+                                    <li>Disilicato de Litio: Rentable y alta calidad.</li>
+                                    <li>Cerámica (Porcelana): Apariencia natural para frontales.</li>
+                                    <li>Resinas Compuestas de Alta Estética.</li>
+                                    <li>Materiales CAD/CAM (discos de circonio, bloques).</li>
+                                </ul>
+                            </li>
+                            <li>Componentes protésicos para implantes dentales.</li>
+                            <li>Productos de odontología cosmética (carillas).</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Oportunidades de Crecimiento</h3>
+                        <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li>Adopción de tecnología digital (impresoras 3D, CAD/CAM).</li>
+                            <li>Especialización en prótesis estéticas.</li>
+                            <li>Colaboración estrecha y comunicación con clínicas dentales.</li>
+                            <li>Atender demanda del turismo dental.</li>
+                            <li>Inversión en I+D de soluciones innovadoras.</li>
+                        </ul>
+                    </div>
+                     <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Impacto de la Tecnología 3D</h3>
+                        <p class="text-neutral-700 mb-2">La impresión 3D reemplaza y mejora la fabricación de:</p>
+                        <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li>Coronas individuales, inlays, onlays, carillas (permanentes y temporales).</li>
+                            <li>Puentes de arco completo y dentaduras removibles.</li>
+                            <li>Modelos dentales para diagnóstico y planificación.</li>
+                            <li>Guías quirúrgicas para implantes.</li>
+                            <li>Férulas oclusales y guardas nocturnas.</li>
+                            <li>Alineadores transparentes.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Rol del Servicio al Cliente</h3>
+                         <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li>Colaboración y comunicación fluida con clínicas.</li>
+                            <li>Conocimiento mutuo de capacidades para mejorar calidad y eficiencia.</li>
+                            <li>Intercambio de información sobre avances tecnológicos.</li>
+                            <li>Eficiencia en la entrega reduce tiempos de espera y mejora satisfacción.</li>
+                            <li>Diferenciador competitivo vital más allá de la calidad técnica.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8 pt-4 border-t border-neutral-200">
+                    <h3 class="text-2xl font-semibold text-teal-700 mb-4 text-center">✨ Generador de Ideas de Productos Innovadores ✨</h3>
+                    <p class="mb-4 text-md text-neutral-600 leading-relaxed text-center">
+                        Haz clic en el botón para obtener ideas de productos innovadores para laboratorios dentales, generadas por inteligencia artificial.
+                    </p>
+                    <div class="flex justify-center mb-4">
+                        <button id="generateIdeasBtn" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105">
+                            Generar Ideas
+                        </button>
+                    </div>
+                    <div id="ideasOutput" class="bg-neutral-50 p-6 rounded-lg shadow-inner border border-neutral-200 min-h-[100px] text-neutral-700 leading-relaxed text-center flex items-center justify-center">
+                        <p id="ideasPlaceholder">Las ideas generadas aparecerán aquí...</p>
+                        <div id="loadingIndicator" class="hidden animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="exportacion" class="mb-12 pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Oportunidades de Exportación a Centro y Sudamérica</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                México tiene potencial para exportar productos dentales a la región. Aquí se analiza la viabilidad, los mercados más atractivos
+                como Brasil y Argentina, y los factores regionales que impulsan la demanda de productos dentales mexicanos.
+            </p>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <div class="grid md:grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Posibilidad de Exportación</h3>
+                        <p class="text-neutral-700 mb-2">México ya exporta instrumentos y aparatos de odontología (US$102M en 2023), dientes artificiales (US$129k en 2023) y otras prótesis (US$6.84M en 2023).</p>
+                        <p class="text-neutral-700">Destinos actuales incluyen Guatemala, Nicaragua, El Salvador. Empresas como Brewer Co. ya distribuyen en la región, indicando canales existentes.</p>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-semibold text-teal-700 mb-4">Mercados Más Interesantes</h3>
+                        <ul class="list-disc list-inside space-y-2 text-neutral-700">
+                            <li><span class="font-semibold">Brasil:</span> "Gran potencia de la odontología", mercado avanzado, alta capacidad de consumo, creciente conciencia de salud dental.</li>
+                            <li><span class="font-semibold">Argentina:</span> Mercado sofisticado, valora calidad e innovación.</li>
+                            <li><span class="font-semibold">Otros:</span> Colombia, Perú, Uruguay, Paraguay, Costa Rica muestran crecimiento en cuidado bucal. Mercados centroamericanos y andinos ofrecen entrada gradual.</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="mt-8">
+                     <h3 class="text-2xl font-semibold text-teal-700 mb-4">Factores de Crecimiento Regional</h3>
+                     <ul class="list-disc list-inside grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-2 text-neutral-700">
+                        <li>Alta incidencia de trastornos dentales.</li>
+                        <li>Envejecimiento de la población.</li>
+                        <li>Creciente conciencia sobre salud bucodental.</li>
+                        <li>Aumento del turismo dental regional.</li>
+                        <li>Integración de equipos digitales.</li>
+                        <li>Aumento de la renta disponible.</li>
+                        <li>Iniciativas gubernamentales pro-salud bucal.</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <section id="conclusiones" class="pt-16 -mt-16">
+            <h2 class="text-3xl font-semibold text-teal-700 mb-6 text-center">Conclusiones y Recomendaciones Estratégicas</h2>
+            <p class="mb-8 text-lg text-neutral-700 leading-relaxed text-center max-w-3xl mx-auto">
+                La industria dental en México presenta un panorama de crecimiento y transformación. Esta sección final resume los hallazgos clave
+                y ofrece recomendaciones estratégicas para los laboratorios dentales que buscan prosperar en este dinámico mercado.
+            </p>
+            <div class="bg-white p-8 rounded-lg shadow-lg space-y-6">
+                <p class="text-neutral-700 leading-relaxed">
+                    La industria dental mexicana es robusta y expansiva, impulsada por el turismo dental, la demanda de odontología cosmética y la digitalización.
+                    Los usuarios muestran mayor conciencia estética, aunque persisten desafíos en prevención y acceso para ciertos grupos.
+                    La profesión de dentista crece, con notable feminización, pero enfrenta informalidad. La especialización es clave para la rentabilidad.
+                </p>
+                <div>
+                    <h4 class="text-xl font-semibold text-teal-600 mb-2">Recomendaciones para Laboratorios Dentales:</h4>
+                    <ol class="list-decimal list-inside space-y-3 text-neutral-700">
+                        <li>
+                            <span class="font-semibold">Enfoque en Productos de Alto Valor y Estética:</span> Priorizar coronas de zirconio, disilicato de litio y cerámicas de alta estética. Invertir en I+D de biomateriales.
+                        </li>
+                        <li>
+                            <span class="font-semibold">Digitalización Integral del Flujo de Trabajo:</span> Adoptar y dominar impresión 3D, escáneres intraorales y CAD/CAM para personalización, eficiencia y reducción de costos.
+                        </li>
+                        <li>
+                            <span class="font-semibold">Fortalecimiento del Servicio al Cliente y Colaboración:</span> Establecer comunicación abierta y eficiente con clínicas, convirtiéndose en un socio estratégico.
+                        </li>
+                        <li>
+                            <span class="font-semibold">Exploración Activa de Oportunidades de Exportación:</span> Investigar mercados de Centro/Sudamérica (especialmente Brasil, Argentina), adaptar oferta y establecer alianzas.
+                        </li>
+                    </ol>
+                </div>
+                <p class="text-neutral-700 leading-relaxed font-semibold text-center">
+                    En síntesis, los laboratorios dentales que inviertan en tecnología de vanguardia, se especialicen en productos de alto valor y cultiven relaciones sólidas con clientes, estarán bien posicionados para capitalizar el crecimiento nacional y regional.
+                </p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-neutral-800 text-amber-50 p-8 mt-12 text-center">
+        <p>&copy; <span id="currentYear"></span> Análisis de la Industria Dental en México. Contenido basado en el informe proporcionado.</p>
+        <p class="text-sm mt-2">Aplicación interactiva generada para visualización de datos.</p>
+    </footer>
+
+    <script>
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+
+        const commonChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#404040' // neutral-700
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: '#e0e0e0' // neutral-300
+                    },
+                    ticks: {
+                        color: '#525252' // neutral-600
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#525252' // neutral-600
+                    }
+                }
+            }
+        };
+        
+        const commonPieChartOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'top',
+                     labels: {
+                        color: '#404040' 
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0,0,0,0.7)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                }
+            }
+        };
+
+
+        // CAGR Chart
+        const cagrData = {
+            labels: ['Turismo Dental MX (24-30)', 'Prótesis MX (23-30)', 'Dispositivos MX (24-29)', 'Equipos LATAM (24-34)', 'Impresión 3D LATAM (25-34)', 'Cuidado Dental Global (24-32)'],
+            datasets: [{
+                label: 'CAGR (%)',
+                data: [19.5, 5.2, 6.8, 2.8, 14.3, 7.0],
+                backgroundColor: [
+                    'rgba(13, 148, 136, 0.7)', // teal-600
+                    'rgba(245, 158, 11, 0.7)', // amber-500
+                    'rgba(20, 184, 166, 0.7)', // teal-500
+                    'rgba(212, 161, 39, 0.7)', // amber-600
+                    'rgba(15, 118, 110, 0.7)', // teal-700
+                    'rgba(217, 119, 6, 0.7)' // amber-600
+                ],
+                borderColor: [
+                    'rgb(13, 148, 136)',
+                    'rgb(245, 158, 11)',
+                    'rgb(20, 184, 166)',
+                    'rgb(212, 161, 39)',
+                    'rgb(15, 118, 110)',
+                    'rgb(217, 119, 6)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        new Chart(document.getElementById('cagrChart'), {
+            type: 'bar',
+            data: cagrData,
+            options: { ...commonChartOptions }
+        });
+
+        // Implantologia Chart
+        const implantologiaData = {
+            labels: ['Implantología', 'Otros Servicios Turísticos'],
+            datasets: [{
+                label: 'Participación en Ingresos Turismo Dental (2023)',
+                data: [36.9, 100 - 36.9],
+                backgroundColor: ['rgba(13, 148, 136, 0.7)', 'rgba(212, 161, 39, 0.7)'],
+                borderColor: ['rgb(13, 148, 136)', 'rgb(212, 161, 39)'],
+                borderWidth: 1
+            }]
+        };
+        new Chart(document.getElementById('implantologiaChart'), {
+            type: 'doughnut',
+            data: implantologiaData,
+            options: { ...commonPieChartOptions }
+        });
+
+        // Prótesis y Dispositivos CAGR Chart
+        const protesisDispositivosData = {
+            labels: ['Prótesis Dentales MX (23-30)', 'Dispositivos Dentales MX (24-29)'],
+            datasets: [{
+                label: 'CAGR (%)',
+                data: [5.2, 6.8],
+                backgroundColor: ['rgba(20, 184, 166, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+                borderColor: ['rgb(20, 184, 166)', 'rgb(245, 158, 11)'],
+                borderWidth: 1
+            }]
+        };
+        new Chart(document.getElementById('protesisDispositivosChart'), {
+            type: 'bar',
+            data: protesisDispositivosData,
+            options: { ...commonChartOptions, indexAxis: 'y' }
+        });
+        
+        // Género Dentistas Chart
+        const generoDentistasData = {
+            labels: ['Mujeres', 'Hombres'],
+            datasets: [{
+                label: 'Distribución por Género (Q3 2024)',
+                data: [68.3, 31.7],
+                backgroundColor: ['rgba(13, 148, 136, 0.7)', 'rgba(245, 158, 11, 0.7)'],
+                borderColor: ['rgb(13, 148, 136)', 'rgb(245, 158, 11)'],
+                borderWidth: 1
+            }]
+        };
+        new Chart(document.getElementById('generoDentistasChart'), {
+            type: 'pie',
+            data: generoDentistasData,
+            options: { ...commonPieChartOptions }
+        });
+
+        // Salario Dentistas Chart
+        const salarioDentistasData = {
+            labels: ['Hombres', 'Mujeres', 'Promedio General'],
+            datasets: [{
+                label: 'Salario Promedio Mensual (MXN, Q3 2024)',
+                data: [9820, 8060, 8620],
+                 backgroundColor: [
+                    'rgba(245, 158, 11, 0.7)', 
+                    'rgba(13, 148, 136, 0.7)',
+                    'rgba(82, 82, 82, 0.7)' // neutral-600
+                ],
+                borderColor: [
+                    'rgb(245, 158, 11)',
+                    'rgb(13, 148, 136)',
+                    'rgb(82, 82, 82)'
+                ],
+                borderWidth: 1
+            }]
+        };
+        new Chart(document.getElementById('salarioDentistasChart'), {
+            type: 'bar',
+            data: salarioDentistasData,
+            options: { ...commonChartOptions, 
+                scales: {
+                    y: { ...commonChartOptions.scales.y, 
+                        ticks: { 
+                            ...commonChartOptions.scales.y.ticks,
+                            callback: function(value) { return '$' + value.toLocaleString('es-MX'); }
+                        } 
+                    },
+                    x: { ...commonChartOptions.scales.x }
+                },
+                plugins: {
+                    ...commonChartOptions.plugins,
+                    tooltip: {
+                        ...commonChartOptions.plugins.tooltip,
+                        callbacks: {
+                             label: function(context) {
+                                let label = context.dataset.label || '';
+                                if (label) {
+                                    label += ': ';
+                                }
+                                if (context.parsed.y !== null) {
+                                    label += '$' + context.parsed.y.toLocaleString('es-MX');
+                                }
+                                return label;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // Smooth scroll for navigation links
+        document.querySelectorAll('header nav a').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                     // Calculate position of target element relative to the viewport
+                    const elementPosition = targetElement.getBoundingClientRect().top;
+                    // Calculate current scroll position
+                    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+                    // Calculate final scroll position, accounting for sticky header height (approx 88px for md, adjust if needed)
+                    // A more robust way would be to get header height dynamically
+                    const headerOffset = document.querySelector('header').offsetHeight || 88; 
+                    const offsetPosition = elementPosition + scrollTop - headerOffset;
+                
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: "smooth"
+                    });
+                }
+            });
+        });
+
+        // Gemini API Integration for Product Ideas
+        const generateIdeasBtn = document.getElementById('generateIdeasBtn');
+        const ideasOutput = document.getElementById('ideasOutput');
+        const ideasPlaceholder = document.getElementById('ideasPlaceholder');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+
+        generateIdeasBtn.addEventListener('click', async () => {
+            ideasPlaceholder.classList.add('hidden');
+            loadingIndicator.classList.remove('hidden');
+            ideasOutput.innerHTML = ''; // Clear previous ideas
+
+            const prompt = `Actúa como un consultor experto en la industria dental. Basándote en las siguientes tendencias y productos clave en el mercado dental mexicano, genera 3-5 ideas de productos innovadores para laboratorios dentales que se especializan en coronas y prótesis. Las ideas deben ser concisas y describir brevemente su valor.
+
+Tendencias:
+- Adopción de digitalización: Impresión 3D, IA, escáneres intraorales, CAD/CAM.
+- Especialización en prótesis estéticas.
+- Demanda de turismo dental.
+- Énfasis en servicio al cliente y colaboración con clínicas.
+
+Productos clave y materiales:
+- Coronas de Zirconio, Disilicato de Litio, Cerámica (Porcelana).
+- Resinas Compuestas de Alta Estética.
+- Componentes protésicos para implantes dentales.
+- Carillas.
+- Modelos dentales para diagnóstico y planificación.
+- Guías quirúrgicas para implantes.
+- Férulas oclusales y guardas nocturnas.
+- Alineadores transparentes.
+
+Ideas de productos innovadores (formato de lista numerada):`;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // If you want to use models other than gemini-2.0-flash or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    ideasOutput.innerHTML = `<ul class="list-disc list-inside text-left mx-auto max-w-md space-y-2">${text.split('\n').filter(line => line.trim() !== '').map(line => `<li>${line.replace(/^\d+\.\s*/, '')}</li>`).join('')}</ul>`;
+                } else {
+                    ideasOutput.innerHTML = '<p class="text-red-600">Error al generar ideas. Inténtalo de nuevo.</p>';
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                ideasOutput.innerHTML = '<p class="text-red-600">Error de conexión. Asegúrate de que tu conexión a internet sea estable.</p>';
+            } finally {
+                loadingIndicator.classList.add('hidden');
+                ideasPlaceholder.classList.remove('hidden'); // This will be hidden by innerHTML, but good to reset if no content
+            }
+        });
+
+        // Gemini API Integration for Summarizing Dentist Trends
+        const summarizeDentistTrendsBtn = document.getElementById('summarizeDentistTrendsBtn');
+        const dentistTrendsSummaryOutput = document.getElementById('dentistTrendsSummaryOutput');
+        const dentistTrendsSummaryPlaceholder = document.getElementById('dentistTrendsSummaryPlaceholder');
+        const dentistTrendsLoadingIndicator = document.getElementById('dentistTrendsLoadingIndicator');
+        const dentistTrendsContent = document.getElementById('dentistTrendsContent');
+
+        summarizeDentistTrendsBtn.addEventListener('click', async () => {
+            dentistTrendsSummaryPlaceholder.classList.add('hidden');
+            dentistTrendsLoadingIndicator.classList.remove('hidden');
+            dentistTrendsSummaryOutput.innerHTML = ''; // Clear previous summary
+
+            const contentToSummarize = dentistTrendsContent.innerText; // Get all text from the section
+            const prompt = `Por favor, resume el siguiente texto sobre las tendencias de los dentistas y la carrera dental en México en 3-5 puntos clave. El resumen debe ser conciso y fácil de entender.
+
+Texto a resumir:
+${contentToSummarize}
+
+Resumen:`;
+
+            try {
+                let chatHistory = [];
+                chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                const payload = { contents: chatHistory };
+                const apiKey = ""; // If you want to use models other than gemini-2.0-flash or imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+                const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const result = await response.json();
+
+                if (result.candidates && result.candidates.length > 0 &&
+                    result.candidates[0].content && result.candidates[0].content.parts &&
+                    result.candidates[0].content.parts.length > 0) {
+                    const text = result.candidates[0].content.parts[0].text;
+                    dentistTrendsSummaryOutput.innerHTML = `<p class="text-left mx-auto max-w-md">${text}</p>`;
+                } else {
+                    dentistTrendsSummaryOutput.innerHTML = '<p class="text-red-600">Error al generar el resumen. Inténtalo de nuevo.</p>';
+                }
+            } catch (error) {
+                console.error('Error calling Gemini API:', error);
+                dentistTrendsSummaryOutput.innerHTML = '<p class="text-red-600">Error de conexión. Asegúrate de que tu conexión a internet sea estable.</p>';
+            } finally {
+                dentistTrendsLoadingIndicator.classList.add('hidden');
+                dentistTrendsSummaryPlaceholder.classList.remove('hidden'); // This will be hidden by innerHTML, but good to reset if no content
+            }
+        });
+    </script>
+</body>
+</html>
